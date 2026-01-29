@@ -1,31 +1,55 @@
-
-
-from typing import Any
-
+import sys
+from pathlib import Path
 
 import requests
+import yaml
 
-OWNER = "Ferrum-Axion"
-REPO_NAME = "python-projects"
+CONFIG_PATH = Path(__file__).parent / "config.yaml"
 
-BRANCHES_URL = f"https://api.github.com/repos/{OWNER}/{REPO_NAME}/branches"
+
+def load_config():
+    with open(CONFIG_PATH, encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
 
 def main():
     try:
-        response = requests.get(BRANCHES_URL)
+        config = load_config()
+    except (OSError, yaml.YAMLError) as e:
+        print(f"Config error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    owner = config["owner"]
+    repo = config["repo"]
+    task_id = config["task_id"]
+    students = config["students"]
+
+    branches_url = f"https://api.github.com/repos/{owner}/{repo}/branches"
+
+    try:
+        response = requests.get(branches_url)
         response.raise_for_status()
         branches = response.json()
-
-        branch_names_comprehension = [b["name"] for b in branches]
-        branch_names_map = list(map(lambda b: b["name"], branches))
-        branch_names = branch_names_comprehension
-        for name in branch_names:
-            print(name)
     except requests.RequestException as e:
-        print(f"Request failed: {e}")
+        print(f"Request failed: {e}", file=sys.stderr)
+        sys.exit(1)
     except (ValueError, KeyError) as e:
-        print(f"Invalid response: {e}")
+        print(f"Invalid response: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    # {task_id}-{student}
+    expected_branches = [f"{task_id}-{student}" for student in students]
+    actual_branches = [b["name"] for b in branches]
+
+    missing = set(expected_branches) - set(actual_branches)
+
+    if missing:
+        print("Missing submissions:")
+        for name in sorted(missing):
+            print(name)
+        sys.exit(2)
+    print("All expected submissions are present.")
+    sys.exit(0)
 
 
 if __name__ == "__main__":
