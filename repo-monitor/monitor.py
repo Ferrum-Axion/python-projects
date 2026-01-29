@@ -19,10 +19,13 @@ def get_branches_names():
         names = list(map(lambda x: x['name'], response.json()))
         return names
     except requests.exceptions.HTTPError as e:
-        print("Error: " + e, file=sys.stderr)
+        print("HTTP error: " + e, file=sys.stderr)
+        sys.exit(1)
+    except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout) as e:
+        print("Connection error: " + e, file=sys.stderr)
         sys.exit(1)
     except KeyError as e:
-        print("Error incomplete config.yaml: " + e)
+        print("Error incomplete config.yaml: " + e, file=sys.stderr)
         sys.exit(1)
 
 def get_expected_branches():
