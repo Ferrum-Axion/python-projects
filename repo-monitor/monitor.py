@@ -1,5 +1,8 @@
 
 
+from typing import Any
+
+
 import requests
 
 OWNER = "Ferrum-Axion"
@@ -13,9 +16,12 @@ def main():
         response = requests.get(BRANCHES_URL)
         response.raise_for_status()
         branches = response.json()
-        for branch in branches:
-            print(f"branches in repo: {REPO_NAME}")
-            print(branch["name"])
+
+        branch_names_comprehension = [b["name"] for b in branches]
+        branch_names_map = list(map(lambda b: b["name"], branches))
+        branch_names = branch_names_comprehension
+        for name in branch_names:
+            print(name)
     except requests.RequestException as e:
         print(f"Request failed: {e}")
     except (ValueError, KeyError) as e:
