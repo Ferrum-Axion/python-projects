@@ -85,14 +85,14 @@ def send_email(subject: str, body: str):
         sg = SendGridAPIClient(api_key)
         response = sg.send(message)
 
-        print("✅ Email sent successfully!")
+        print(" Email sent successfully!")
         print("Status code:", response.status_code)
 
     except Exception as e:
-        print("❌ Failed to send email")
+        print("Failed to send email")
         print(e)
 
 
 get_branches()
 
-send_email("test", "test")
+send_email("email verification test", "this is the email verification test!")
