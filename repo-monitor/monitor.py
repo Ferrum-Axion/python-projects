@@ -37,7 +37,7 @@ def open_issue(not_submitted_names):
         headers = {"Authorization" : f"Bearer {token}", "Accept": "application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28"}
         body = {"title": "missing submissions", "body": str(not_submitted_names)}
         
-        response = requests.post(f"https://api.github.com/repos/{config["owner"]}/{config["repo"]}/issues",headers=headers, json=body)
+        response = requests.post(f"https://api.github.com/repos/{config['owner']}/{config['repo']}/issues",headers=headers, json=body)
         print(token)
         response.raise_for_status()
     except requests.exceptions.HTTPError as errh:
@@ -48,11 +48,11 @@ def get_branches():
         config = get_config()
         task_id = config["task_id"]
         try:
-            response = requests.get(f"https://api.github.com/repos/{config["owner"]}/{config["repo"]}/branches")
+            response = requests.get(f"https://api.github.com/repos/{config['owner']}/{config['repo']}/branches")
             response.raise_for_status()
             data = response.json()
             branches_names = list(map(lambda b : b["name"].lower(), data))
-            expected_branches = list(map(lambda s : f"{task_id}-{s}" , config["students"]))
+            expected_branches = list(map(lambda s : f"{task_id}-{s}" , config['students']))
             print(branches_names)
             all_submitted,not_submitted_names = students_all_submitted(branches_names, expected_branches)
             if all_submitted:
