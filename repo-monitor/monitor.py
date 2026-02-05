@@ -5,15 +5,18 @@ import yaml
 from dotenv import load_dotenv
 import os
 import certifi
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
 load_dotenv()
+
+os.environ["SSL_CERT_FILE"] = certifi.where()
+
+print(certifi.where())
 
 def get_config():
     with open("./config.yaml") as file:
         return yaml.safe_load(file)
-
-
-
-
 
 def students_all_submitted(branches, expected_students):
     not_submitted = []
@@ -38,14 +41,25 @@ def open_issue(not_submitted_names):
         print(str(errh))
 
 
+
+def send_mail(subject, body):
+    email_from = os.environ["EMAIL_ADDRESS_NAHAR"]
+    api_key = os.environ["SENDGRID_API_KEY"]
+
+    message = Mail(from_email=email_from, to_emails= email_from, 
+                   subject=subject, html_content=f"<strong>{body}</strong>")
+    sendgrid_client = SendGridAPIClient(api_key)
+    response = sendgrid_client.send(message)
+    print(response.status_code)
+
+
+
 def get_branches():
         config = get_config()
         task_id = config["task_id"]
         try:
             
             response = requests.get(f"https://api.github.com/repos/{config['owner']}/{config['repo']}/branches")
-            
-            
             response.raise_for_status()
 
             
@@ -57,9 +71,10 @@ def get_branches():
             all_submitted,not_submitted_names = students_all_submitted(branches_names, expected_branches)
             print(not_submitted_names)
             if all_submitted:
+                send_mail("sendgrid test","All student submited!")
                 sys.stdout.write("All studentes submited the homework")
             else:
-                print("")
+                send_mail("theese didint submit yet",' '.join(not_submitted_names))
                 # open_issue(not_submitted_names)
 
         except requests.exceptions.HTTPError as errh:
@@ -69,22 +84,6 @@ def get_branches():
 
 
 
-def send_email(subject: str, body: str):
-    # print(certifi.where())
-    os.environ["SSL_CERT_FILE"] = certifi.where()
-    from_email = os.environ["EMAIL_ADDRESS"]
-    to_email= os.environ["EMAIL_ADDRESS"]
-    message = Mail(
-        from_email=from_email,
-        to_emails=to_email,
-        subject="This is the subject",
-        html_content='<div> THis is my test email </div>'
-    )
-    sg_client = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
-    response = sg_client.send(message)
-    print(response.status_code)
-    print(response.body)
-    print(response.headers)
 
 # def send_email_gmail(subject: str, body: str):
 
@@ -104,4 +103,3 @@ def send_email(subject: str, body: str):
 #     server.quit()
 
 get_branches()
-send_email("email verification test", "this is the email verification test!")
