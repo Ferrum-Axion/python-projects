@@ -1,7 +1,12 @@
 import requests
 import yaml
 import sys
+import os  
+from sendgrid import SendGridAPIClient  
+from sendgrid.helpers.mail import Mail
+from dotenv import load_dotenv
 
+load_dotenv()
 
 config = None
 def get_config():
@@ -49,8 +54,25 @@ def print_out(not_submitted):
     else:
         print("Not submitted branches: " + str(not_submitted))
 
+def send_mail(subject, body):
+    message = Mail(
+    from_email='dmitryporotov@gmail.com',
+    to_emails='dmitryporotov@gmail.com',
+    subject=subject,
+    html_content=f'<strong>{body}</strong>')
+    try:
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY_DMITRY'))
+        response = sg.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        print(e.message)
+
 if '__main__' == __name__:
     # print(get_branches_names())
     # print(get_expected_branches())
     not_sub = check_submittions(get_branches_names(), get_expected_branches())
     print_out(not_sub)
+    if len(not_sub) == 0:
+        send_mail("Everyone submitted homework", "Everyone submitted homework")
