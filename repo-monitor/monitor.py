@@ -28,19 +28,26 @@ def expected_branches():
         expected_student.append(f"{TASK_ID}-{student}")
     return expected_student
 
-def missing_branches(current, expected):
+def missing_branches (branches, expected_student):
     missing = []
-    for branch in expected:
-        if branch not in current:
+    for branch in expected_student:
+        if branch not in branches:
             missing.append(branch)
-            print("there are missing branches")
             sys.exit(2) # Exit with code 2 if any branch is missing
         else:
             print(f" All the branches are present.")      
     return missing
 
-print("the current branches are:", get_current_branches(OWNER, REPO))
 
-print("the expected branches are:", expected_branches())
+def main():
+    branches = get_current_branches(OWNER, REPO)
+    expected_student = expected_branches()
+    missing = missing_branches(branches, expected_student)
+    print(missing)
+    if missing:
+        print("Missing branches:", missing)
+    else:
+        print("All branches are present.")
 
-print("the missing branches are:", missing_branches(get_current_branches(OWNER, REPO), expected_branches()))
+if __name__ == "__main__":
+    main()
