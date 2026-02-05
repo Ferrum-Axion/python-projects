@@ -4,11 +4,7 @@ import sys
 import yaml
 from dotenv import load_dotenv
 import os
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
 import certifi
-
-
 load_dotenv()
 
 def get_config():
@@ -46,13 +42,20 @@ def get_branches():
         config = get_config()
         task_id = config["task_id"]
         try:
+            
             response = requests.get(f"https://api.github.com/repos/{config['owner']}/{config['repo']}/branches")
+            
+            
             response.raise_for_status()
+
+            
             data = response.json()
+            
             branches_names = list(map(lambda b : b["name"].lower(), data))
+
             expected_branches = list(map(lambda s : f"{task_id}-{s}" , config['students']))
-            print(branches_names)
             all_submitted,not_submitted_names = students_all_submitted(branches_names, expected_branches)
+            print(not_submitted_names)
             if all_submitted:
                 sys.stdout.write("All studentes submited the homework")
             else:
@@ -67,31 +70,38 @@ def get_branches():
 
 
 def send_email(subject: str, body: str):
-    print(certifi.where())
+    # print(certifi.where())
     os.environ["SSL_CERT_FILE"] = certifi.where()
-    from_email = "nahar1995@gmail.com"
-    to_email = "nahar1995@gmail.com"
-    api_key = os.getenv("SENDGRID_API_KEY")
-    print("api_key",api_key)
+    from_email = os.environ["EMAIL_ADDRESS"]
+    to_email= os.environ["EMAIL_ADDRESS"]
     message = Mail(
         from_email=from_email,
         to_emails=to_email,
-        subject=subject,
-        html_content=f"<pre>{body}</pre>"
+        subject="This is the subject",
+        html_content='<div> THis is my test email </div>'
     )
+    sg_client = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
+    response = sg_client.send(message)
+    print(response.status_code)
+    print(response.body)
+    print(response.headers)
 
-    try:
-        sg = SendGridAPIClient(api_key)
-        response = sg.send(message)
+# def send_email_gmail(subject: str, body: str):
 
-        print(" Email sent successfully!")
-        print("Status code:", response.status_code)
+#     sender = os.getenv("EMAIL_ADDRESS")
+#     password = os.getenv("EMAIL_PASSWORD")
+#     print(password)
+#     message = MIMEMultipart()
+#     message["From"] = sender
+#     message["To"]  = sender
+#     message["Subject"] = "This is a test subject"
 
-    except Exception as e:
-        print("Failed to send email")
-        print(e)
-
+#     message.attach(MIMEText(body,"plain"))
+#     server = smtplib.SMTP("smtp.gmail.com", 587)
+#     server.starttls()
+#     server.login(sender,password)
+#     server.sendmail(sender,sender, message.as_string())
+#     server.quit()
 
 get_branches()
-
 send_email("email verification test", "this is the email verification test!")
