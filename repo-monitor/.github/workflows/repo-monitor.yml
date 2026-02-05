@@ -2,7 +2,7 @@ name: Repo Monitor
 
 on:
   push:
-    branches: [main]
+    branches: [repo-monitor-tomer]
   workflow_dispatch:
 
 jobs:
@@ -22,6 +22,6 @@ jobs:
 
       - name: Run monitor script
         env:
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-          SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
+          SENDGRID_API_KEY_Tomer: ${{ secrets.SENDGRID_API_KEY_Tomer }}
+          SENDGRID_SENDER_EMAIL_Tomer: ${{ secrets.SENDGRID_SENDER_EMAIL_Tomer }}
         run: python monitor_tomer.py

@@ -11,9 +11,9 @@ CONFIG_PATH = Path(__file__).parent / "config.yaml"
 
 
 def send_mail(subject, body):
-    """Send email via SendGrid using SENDGRID_API_KEY and SENDGRID_SENDER_EMAIL from env."""
-    api_key = os.environ.get("SENDGRID_API_KEY")
-    sender = os.environ.get("SENDGRID_SENDER_EMAIL")
+    """Send email via SendGrid using SENDGRID_API_KEY_Tomer and SENDGRID_SENDER_EMAIL_Tomer from env."""
+    api_key = os.environ.get("SENDGRID_API_KEY_Tomer")
+    sender = os.environ.get("SENDGRID_SENDER_EMAIL_Tomer")
     if not api_key or not sender:
         return  # skip if secrets not set (e.g. local run without .env)
     message = Mail(
