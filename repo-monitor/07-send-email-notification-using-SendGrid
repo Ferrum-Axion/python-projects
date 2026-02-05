@@ -1,0 +1,48 @@
+# Repo Monitor — Step 7: Send Email Notification using SendGrid
+
+TASK_ID = repo-monitor
+
+
+Continue working in the same file: `monitor.py`.
+
+## Work
+(api reference)  - https://app.sendgrid.com/guide/integrate/langs/python
+
+1. Import SendGrid classes.
+
+   Add imports:
+
+   import os  
+   from sendgrid import SendGridAPIClient  
+   from sendgrid.helpers.mail import Mail  
+
+2. Create a function responsible for sending email.
+
+   The function should receive:
+
+   - subject
+   - body
+
+3. Inside the function, read the API key from environment variable.
+
+   Use the same environment variable created in the previous step.
+
+4. Create an email message object.
+
+   The message should include:
+
+   - sender email (your verified sender)
+   - recipient email
+   - subject
+   - email content
+
+5. Create SendGrid client.
+
+   The client uses the API key to authenticate with SendGrid.
+
+6. Send the email using the SendGrid client.
+
+7. Call the function when all expected branches exist.
+
+   The email should be sent only when all students submitted.
+
