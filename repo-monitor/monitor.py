@@ -33,9 +33,7 @@ def missing_branches (branches, expected_student):
     for branch in expected_student:
         if branch not in branches:
             missing.append(branch)
-            sys.exit(2) # Exit with code 2 if any branch is missing
-        else:
-            print(f" All the branches are present.")      
+            # sys.exit(2) # Exit with code 2 if any branch is missing
     return missing
 
 
