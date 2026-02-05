@@ -21,4 +21,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run monitor script
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
         run: python monitor_tomer.py

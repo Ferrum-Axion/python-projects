@@ -9,10 +9,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 load_dotenv()
-
-os.environ["SSL_CERT_FILE"] = certifi.where()
-
-print(certifi.where())
+os.environ.setdefault("SSL_CERT_FILE", certifi.where())
 
 def get_config():
     with open("./config.yaml") as file:
@@ -43,13 +40,19 @@ def open_issue(not_submitted_names):
 
 
 def send_mail(subject, body):
-    email_from = os.environ["EMAIL_ADDRESS_NAHAR"]
-    api_key = os.environ["SENDGRID_API_KEY"]
-
-    message = Mail(from_email=email_from, to_emails= email_from, 
-                   subject=subject, html_content=f"<strong>{body}</strong>")
-    sendgrid_client = SendGridAPIClient(api_key)
-    response = sendgrid_client.send(message)
+    """Send email via SendGrid. Uses SENDGRID_API_KEY and SENDGRID_SENDER_EMAIL (verified sender)."""
+    api_key = os.environ.get("SENDGRID_API_KEY")
+    sender = os.environ.get("SENDGRID_SENDER_EMAIL")
+    if not api_key or not sender:
+        raise ValueError("SENDGRID_API_KEY and SENDGRID_SENDER_EMAIL must be set")
+    message = Mail(
+        from_email=sender,
+        to_emails=sender,
+        subject=subject,
+        html_content=f"<strong>{body}</strong>",
+    )
+    client = SendGridAPIClient(api_key)
+    response = client.send(message)
     print(response.status_code)
 
 
@@ -71,11 +74,13 @@ def get_branches():
             all_submitted,not_submitted_names = students_all_submitted(branches_names, expected_branches)
             print(not_submitted_names)
             if all_submitted:
-                send_mail("sendgrid test","All student submited!")
-                sys.stdout.write("All studentes submited the homework")
+                send_mail("Repo monitor: all submissions in", "All students submitted.")
+                sys.stdout.write("All students submitted the homework.")
+                sys.exit(0)
             else:
-                send_mail("theese didint submit yet",' '.join(not_submitted_names))
+                print("Missing submissions:", not_submitted_names)
                 # open_issue(not_submitted_names)
+                sys.exit(2)
 
         except requests.exceptions.HTTPError as errh:
             sys.stderr.write(str(errh))
