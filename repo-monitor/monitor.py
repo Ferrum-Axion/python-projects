@@ -12,9 +12,7 @@ import certifi
 load_dotenv()
 
 def get_config():
-    relative_path = os.path.join("repo-monitor", "config.yaml")
-    full_path = os.path.abspath(relative_path)
-    with open(full_path) as file:
+    with open("./config.yaml") as file:
         return yaml.safe_load(file)
 
 
@@ -69,6 +67,7 @@ def get_branches():
 
 
 def send_email(subject: str, body: str):
+    print(certifi.where())
     os.environ["SSL_CERT_FILE"] = certifi.where()
     from_email = "nahar1995@gmail.com"
     to_email = "nahar1995@gmail.com"
