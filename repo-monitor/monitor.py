@@ -1,6 +1,25 @@
 import requests
 import sys
 import yaml
+import os
+from dotenv import load_dotenv
+from sendgrid import SendGridAPIClient  
+from sendgrid.helpers.mail import Mail  
+
+load_dotenv()
+
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
+
+def send_email(subject, body):
+    api_key=os.getenv("SENDGRID_API_KEY")
+    message = Mail(
+        from_email="elena.kyurshunova@gmail.com",
+        to_emails="elena.kyrushunova@gmail.com",
+        subject=subject,
+        plain_text_content=body
+    )
+    sg = SendGridAPIClient(api_key)
+    response = sg.send(message)
 
 try:
     with open("config.yaml", "r") as f:
@@ -43,6 +62,11 @@ try:
         sys.exit(2)
     else:
         print("Success: All students submitted their branches!")
+        subject_text = f"Repo Monitor: {TASK_NAME} - Success!"
+        body_text = f"Yay, all students have succesfully submited their branches to {REPO_NAME}!"
+
+        send_email(subject_text, body_text)
+
         sys.exit(0)
 
 except requests.exceptions.ConnectionError:
