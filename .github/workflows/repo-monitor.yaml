@@ -21,4 +21,4 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r repo-monitor/requirements.txt
       - name: Run Monitor
-        run: python repo-monitor/monitor.py
+        run: cd repo-monitor && python monitor.py
