@@ -15,7 +15,7 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: Verify secret exists
-        run: python repo-monitor/monitor.py
+        run: cd repo-monitor && python monitor.py
         env:
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
