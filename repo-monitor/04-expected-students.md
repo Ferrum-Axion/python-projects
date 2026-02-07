@@ -1,76 +1,79 @@
-# Repo Monitor — Step 4: Expected Students + Branch Comparison
+import sys
+import requests
 
-TASK_ID = repo-monitor
+OWNER = "Ferrum-Axion"
+REPO_NAME = "python-projects"
 
-Continue in the same file: `monitor.py`.
+TASK_NAME = "repo-monitor"  # זה ה-TASK_ID/שם המשימה
+expected_students = [
+    "rafi",
+    "yaron",
+    "vladi",
+    "tomer",
+    "liad",
+    "elena",
+    "dvir",
+    "dmitry",
+    "aviv",
+]
 
-At this stage you already have:
+url = f"https://api.github.com/repos/{OWNER}/{REPO_NAME}/branches"
 
-- branch fetch working
-- branch name extraction
-- basic error handling
+# -------------------------
+# Step 3: error handling
+# -------------------------
+try:
+    response = requests.get(url, timeout=15)
+except requests.exceptions.RequestException as e:
+    print("ERROR: Network/Request problem while contacting GitHub API")
+    print("Details:", e)
+    sys.exit(1)
 
-Now you turn it into a real submission checker.
+print("Status code:", response.status_code)
 
----
+if response.status_code != 200:
+    print("ERROR: GitHub API returned a non-200 response")
+    print("Response text:", response.text)
+    sys.exit(1)
 
-## Work
+try:
+    branches = response.json()
+except ValueError:
+    print("ERROR: Response is not valid JSON")
+    print("Response text:", response.text)
+    sys.exit(1)
 
-1. Define a temporary list of expected students inside the script:
+if not isinstance(branches, list):
+    print("ERROR: Expected a list of branch objects, got:", type(branches))
+    print("Raw JSON response:")
+    print(branches)
+    sys.exit(1)
 
-- `expected_students = [...]`
+# -------------------------
+# Step 2: extract names
+# -------------------------
+actual_branches = [b["name"] for b in branches]
 
-2. Define a task identifier:
+print("\nActual branch names:")
+print(actual_branches)
 
-- `TASK_NAME`
+# -------------------------
+# Step 4: expected branches
+# -------------------------
+expected_branches = [f"{TASK_NAME}-{student}" for student in expected_students]
 
-3. Define the required branch naming convention:
+print("\nExpected branch names:")
+print(expected_branches)
 
-- `{TASK_NAME}-{student}`
+# Compare (set difference)
+missing = sorted(list(set(expected_branches) - set(actual_branches)))
 
-Example:
-
-- `task-3-dana`
-- `task-3-yossi`
-
-4. Generate the expected branch list from the student list.
-
-Use:
-
-- list comprehension (preferred)
-- or `map()` (optional practice)
-
----
-
-## Compare Against Actual Branches
-
-5. You now have:
-
-- `expected_branches`
-- `actual_branches`
-
-Compute missing submissions:
-
-- expected minus actual
-
-Recommended Python tool:
-
-- `set` difference
-
-6. Print results clearly:
-
-- If some are missing → print missing branch names
-- If none are missing → print success message
-
----
-
-## Exit Codes (initial)
-
-Add basic status behavior:
-
-- Missing submissions → `sys.exit(2)`
-- Everything submitted → `sys.exit(0)`
-
-At this stage the tool can already act as a checker.
-
-Next: remove hardcoded student lists and move configuration into `config.yaml`.
+print("\n=== RESULT ===")
+if missing:
+    print("Missing submissions (branches not found):")
+    for b in missing:
+        print("-", b)
+    sys.exit(2)
+else:
+    print("✅ All submissions found. Great job!")
+    sys.exit(0)

@@ -1,7 +1,7 @@
 owner: Ferrum-Axion
-repo: python-intro
-task_id: repo-monitor
-students:
+repo: python-projects
+task_name: repo-monitor
+expected_students:
   - liad
   - aviv
   - dmitry
@@ -11,5 +11,5 @@ students:
   - yaron
   - rafi
   - mattan
-  - vladimir
+  - vladi
   - tomer
