@@ -1,6 +1,13 @@
 import requests
-import sys
 import yaml
+import sys
+import os
+from dotenv import load_dotenv
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
+# Load environment variables early
+load_dotenv()
 
 with open("config.yaml") as f:
     config = yaml.safe_load(f)
@@ -36,8 +43,38 @@ try:
         sys.exit(2)
     else:
         print("All submitted.")
-        sys.exit(0)
 
+        # Send notification email 
+        load_dotenv()
+
+        def send_email(subject, body):
+            api_key = os.getenv("SENDGRID_API_KEY")
+            sender = os.getenv("SENDER_EMAIL")
+            recipient = os.getenv("RECIPIENT_EMAIL")
+            if not api_key or not sender or not recipient:
+                print("Warning: Email not sent, missing environment variables", file=sys.stderr)
+                return
+            subject = f"Repo Monitor: {subject}"
+            message = Mail(from_email=sender, to_emails=recipient, subject=subject, html_content=body)
+            try:
+                sg = SendGridAPIClient(api_key)
+                sg.send(message)
+                print("Notification email sent.")
+                return True
+            except Exception as e:
+                print(f"Error: Failed to send email — {e}", file=sys.stderr)
+                return False
+            
+        # Build email content and send
+        subject = f"All submissions received for {task_name}"
+        body = "<p>All expected branches were found:</p><ul>"
+        for name in sorted(expected_branches):
+            body += f"<li>{name}</li>"
+        body += "</ul>"
+
+        send_email(subject, body)
+        sys.exit(0)
+        
 except requests.RequestException as e:
     print(f"Error: Network request failed — {e}", file=sys.stderr)
     sys.exit(1)
