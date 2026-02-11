@@ -1,6 +1,10 @@
 import requests
 import sys
 import yaml
+from sendgrid import SendGridAPIClient  
+from sendgrid.helpers.mail import Mail
+from dotenv import load_dotenv
+
 #1
 OWNER = "Ferrum-Axion"
 REPO_NAME = "python-projects"
