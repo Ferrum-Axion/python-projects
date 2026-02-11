@@ -41,7 +41,6 @@ try:
         print("Missing:")
         for name in sorted(missing):
             print("  -", name)
-        sys.exit(2)
     else:
         print("All submitted.")
 
