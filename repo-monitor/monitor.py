@@ -6,8 +6,10 @@ from dotenv import load_dotenv
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
-# Load environment variables early
 load_dotenv()
+
+# Change to script directory so relative paths work
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 with open("config.yaml") as f:
     config = yaml.safe_load(f)
