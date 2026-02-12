@@ -24,4 +24,5 @@ jobs:
       - name: Run Repo Monitor script
         env:
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY_ELENA }}
-        run: python repo-monitor/monitor.py
+        working-directory: ./repo-monitor
+        run: python monitor.py
