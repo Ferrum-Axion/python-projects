@@ -1,0 +1,5 @@
+# Web Task - Tracked History
+
+This project extends a complete static website deployment workflow (SSL, deploy, backup, rollback, health check) by adding a persistent history layer that tracks deploy and rollback operations in a database.
+
+Start from your working web deployment project, place it inside this repository, and integrate the provided tracking layer so every deploy and rollback action is recorded as an explicit operation with status and timestamp.
