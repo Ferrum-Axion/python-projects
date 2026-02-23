@@ -12,7 +12,7 @@ CONFIG_DEST="/etc/nginx/sites-available/devops-site"
 echo "Starting Deploy..."
 
 start_time=$SECONDS
-
+start_ns=$(date +%s%N)
 
 echo "PROJECT_ROOT=$PROJECT_ROOT"
 echo "MY_SITE=$MY_SITE"
@@ -34,11 +34,13 @@ sudo nginx -t
 sudo systemctl reload nginx
 
 echo "Deploy done!"
+end_ns=$(date +%s%N)
+
 duration=$(( SECONDS - start_time ))
+duration_seconds=$(awk "BEGIN {printf \"%.3f\", ($end_ns - $start_ns)/1000000000}")
 mydir="$(basename "$PWD")"
 echo "$mydir"
-echo 'seconds' is $SECONDS
 
 source venv/bin/activate
-python3 log_operations.py deploy success $duration
+python3 log_operations.py deploy success $duration_seconds
 
