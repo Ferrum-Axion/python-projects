@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+###################
+#
+# Created by: Elena Kuznetsov
+# Purpose: Site and config deployment
+# Version: 0.0.1
+# Date: 2/2/2026
+#
+###################
+
+# Засекаем время начала (в секундах)
+START_TIME=$(date +%s)
+
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+MY_SITE="$PROJECT_ROOT/site"
+MY_CONFIG="$PROJECT_ROOT/nginx/site.conf"
+
+SITE_DEST="/var/www/devops-site"
+CONFIG_DEST="/etc/nginx/sites-available/devops-site"
+
+echo "Starting Deploy..."
+
+echo "Copying files from $MY_SITE to $SITE_DEST..." 
+if sudo cp -r "$MY_SITE/"* "$SITE_DEST";
+then 
+    echo "Successfuly copied the files!"
+else
+    echo "Something went wrong"
+    exit 1
+fi
+
+echo "Updating NGINX Config..."
+
+MY_SSL_CONFIG="$PROJECT_ROOT/nginx/site-ssl.conf"
+SSL_CONFIG_DEST="/etc/nginx/sites-available/devops-site-ssl"
+
+if sudo cp "$MY_CONFIG" "$CONFIG_DEST" && sudo cp "$MY_SSL_CONFIG" "$SSL_CONFIG_DEST";
+then
+    echo "Successfuly updated config!"
+    echo "Creating symbolic links..."
+    if sudo ln -sf "$CONFIG_DEST" "/etc/nginx/sites-enabled/devops-site" && sudo ln -sf "$SSL_CONFIG_DEST" "/etc/nginx/sites-enabled/devops-site-ssl";
+    then 
+        echo "Succesuly updated config in sites-availble!"
+    else
+        echo "Something went wrong"
+        exit 1
+    fi
+else
+    echo "Something went wrong"
+    exit 1
+fi
+
+echo "Verifying nginx id correct..." 
+echo "Output:"
+if sudo nginx -t;
+then
+    echo "Nginx configuration is correct! Restarting Ngnix..."
+    sudo systemctl reload nginx
+    echo "Success!"
+    
+
+    END_TIME=$(date +%s)
+    DURATION=$((END_TIME - START_TIME))
+
+
+    source "$PROJECT_ROOT/.venv/bin/activate"
+    python3 "$PROJECT_ROOT/log_tracker.py" "deploy" "success" "$DURATION"
+    
+    exit 0
+else
+    echo "ERROR: something went wrong:\("
+    exit 1
+fi
