@@ -33,3 +33,12 @@ def test_deploy_copies_site():
         source_html.write_text(original_content)
         sh.rmtree(site_dest)
         sh.copytree(backup, site_dest)
+
+def test_deploy_copies_nginx_config():
+    config_source = project_root / "nginx" / "site.conf"
+    config_dest = Path("/etc/nginx/sites-available/devops-site")
+    
+    sp.run(["bash", str(project_root / "scripts" / "deploy.sh")], check=True)
+    assert config_dest.is_file()
+    assert config_source.read_text() == config_dest.read_text()
+    
