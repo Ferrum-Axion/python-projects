@@ -2,14 +2,14 @@ from pathlib import Path
 import subprocess as sp
 import shutil as sh
 
-project_root = Path(__file__).resolve().parent.parent  # Go up to project root
+project_root = Path(__file__).resolve().parent.parent 
 tmp_dir = project_root / ".tmp"
 tmp_dir.mkdir(exist_ok=True)  
 
 def test_sanity():
     file = tmp_dir / "test.txt"
-    file.write_text("Aviv is the testing!")
-    assert file.read_text() == "Aviv is the testing!"
+    file.write_text("Aviv is testing!")
+    assert file.read_text() == "Aviv is testing!"
 
 def test_deploy_copies_site():
     site_source = project_root / "site"
