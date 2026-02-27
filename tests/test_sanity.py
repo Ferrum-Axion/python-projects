@@ -1,6 +1,7 @@
 from pathlib import Path
 import subprocess as sp
 import shutil as sh
+import psycopg
 
 project_root = Path(__file__).resolve().parent.parent 
 tmp_dir = project_root / ".tmp"
@@ -41,4 +42,32 @@ def test_deploy_copies_nginx_config():
     sp.run(["bash", str(project_root / "scripts" / "deploy.sh")], check=True)
     assert config_dest.is_file()
     assert config_source.read_text() == config_dest.read_text()
+
+def test_deploy_logs_to_postgres():
+    # Step 1: connect to ops_db
+    conn = psycopg.connect("dbname=ops_db user=postgres password=password host=localhost")
+    cur = conn.cursor()
     
+    # Step 2: count before deploy
+    cur.execute("SELECT COUNT(*) FROM operations")
+    count_before = cur.fetchone()[0]
+    
+    # Step 3: run deploy
+    sp.run(["bash", str(project_root / "scripts" / "deploy.sh")], check=True)
+
+    # Step 4: assert count increased by 1
+    cur.execute("SELECT COUNT(*) FROM operations")
+    count_after = cur.fetchone()[0]
+    assert count_after == count_before + 1
+
+    # Step 5: fetch latest row and assert
+    cur.execute("SELECT action_type, status FROM operations ORDER BY id DESC LIMIT 1")
+    action_type, status = cur.fetchone()
+    assert action_type == "deploy"
+    assert status == "success"
+
+    # Cleanup: delete the row created by this test
+    cur.execute("DELETE FROM operations WHERE id = (SELECT MAX(id) FROM operations)")
+    conn.commit()
+    cur.close()
+    conn.close()
